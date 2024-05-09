@@ -2,6 +2,8 @@
 
 import { z } from 'zod';
 
+const passwordRegex = new RegExp(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*?[#?!@$%^&*-]).+$/);
+
 const formSchema = z
   .object({
     username: z
@@ -10,7 +12,7 @@ const formSchema = z
       .max(10, 'too long!')
       .refine((username) => !username.includes('aaa'), 'No'),
     email: z.string().email(),
-    password: z.string().min(10),
+    password: z.string().min(10).regex(passwordRegex),
     confirm_password: z.string().min(10),
   })
   .superRefine(({ password, confirm_password }, ctx) => {
@@ -33,5 +35,7 @@ export async function createAccount(prevState: any, formData: FormData) {
   const result = formSchema.safeParse(data);
   if (!result.success) {
     return result.error.flatten();
+  } else {
+    console.log(result.data);
   }
 }
